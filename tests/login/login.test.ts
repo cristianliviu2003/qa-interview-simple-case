@@ -5,25 +5,27 @@ test.describe.configure({ mode: 'serial' })
 
 test.describe('login form tests', () => {
   test('logging in works with existing account', async ({ page }) => {
-    await page.goto('localhost:8080/login')
 
+    // load main page
+    await page.goto('localhost:8080/login')
+    await expect(page).toHaveTitle("QA Interview case")
+
+    // user credentials from test-setup\localStorage.setup.ts
     const existingUser = existingUsers[0]
 
-    await page
-      .locator('#root form div:nth-child(1) > div > input')
-      .pressSequentially(existingUser.email)
+    // input email
+    await expect(page.locator("#email")).toBeVisible() 
+    await page.locator("#email").pressSequentially(existingUser.email)
+  
+    // input password
+    await expect(page.locator("#password")).toBeVisible()
+    await page.locator("#password").pressSequentially(existingUser.password)
 
-    await page
-      .locator('#root form div:nth-child(2) > div > input')
-      .pressSequentially(existingUser.password)
+    // submit button
+    const submitButton = page.locator("//button[text()='Login']");
+    await expect(submitButton).toBeEnabled()
+    await submitButton.click();
 
-    // Submit button
-    const button = page.locator('form .MuiButton-sizeMedium')
-    // Click on the button
-    button.click()
-
-    // Wait for 1 second until page is fully loaded
-    await page.waitForTimeout(1000)
-    await expect(page.getByText('Log out')).toBeVisible()
-  })
+    // wait for element visibility
+    await expect(page.getByText('Log out')).toBeVisible()  })
 })
